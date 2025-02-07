@@ -1,0 +1,180 @@
+/* Reset de estilos e variáveis */
+@font-face {
+    font-family: 'Fonte';
+    src: url('/fonte/agency-fb/AGENCYB.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Fonte', sans-serif;
+}
+
+:root {
+    --roxo-padrao: #6200EE;
+    --roxo-claro: #8b5cf6;
+    --azul-padrao: #0073cf;
+    --azul-escuro: #005c99;
+    --preto2: #0d051c;
+    --cinza-escuro: #1e1e2f;
+    --branco: #FFFFFF;
+    --branco-transparente: rgba(255, 255, 255, 0.7);
+    --cinza-texto: #CCCCCC;
+}
+
+/* Estilo do body */
+body.background-preto2 {
+    background: linear-gradient(135deg, var(--preto2), var(--cinza-escuro));
+    color: var(--branco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-smooth: always;
+}
+
+/* Container principal */
+.container {
+    max-width: 400px;
+    width: 90%; /* Adapta para telas menores */
+    padding: 30px;
+    text-align: center;
+    background-color: var(--cinza-escuro);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Logo */
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.text-quim {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--roxo-claro);
+}
+
+.text-lab {
+    color: var(--azul-padrao);
+}
+
+/* Formulário */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%; /* Garante alinhamento interno */
+}
+
+.input-roxo {
+    background-color: var(--preto2);
+    color: var(--branco);
+    border: 2px solid var(--roxo-padrao);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    width: 100%; /* Garante que ocupe a largura disponível */
+}
+
+.input-roxo::placeholder {
+    color: var(--branco-transparente);
+    font-style: italic;
+}
+
+.input-roxo:focus {
+    outline: none;
+    border-color: var(--roxo-claro);
+    box-shadow: 0 0 8px var(--roxo-padrao);
+}
+
+/* Botão */
+.button-azul {
+    background: var(--azul-padrao);
+    color: var(--branco);
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.button-azul:hover {
+    background: var(--azul-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 115, 207, 0.4);
+}
+
+.button-azul:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Links */
+.login-redirect {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: var(--cinza-texto);
+}
+
+.login-redirect a {
+    color: var(--roxo-claro);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login-redirect a:hover {
+    color: var(--roxo-padrao);
+    text-decoration: underline;
+}
+
+/* Ajuste específico para "Sobre o QuimLab" */
+.info {
+    font-size: 0.9em; /* Ajusta tamanho do texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espaçamento entre ícone e texto */
+    margin-top: 16px; /* Ajusta o espaçamento acima */
+    color: var(--branco-transparente);
+}
+
+.info-icon {
+    width: 20px; /* Ajusta o tamanho do ícone */
+    height: 20px;
+    filter: brightness(0.8);
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
+
+    .info {
+        font-size: 0.8em;
+    }
+
+    .info-icon {
+        width: 16px;
+        height: 16px;
+    }
+}
+.text-login , .text-cadastro{
+    margin-bottom: 20px;
+}
