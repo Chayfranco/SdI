@@ -28,7 +28,108 @@
         <p class="login-redirect">Já tem uma conta? <a href="login.html">Faça Login</a></p>
 
     </div>
-    <script type="module" src="/js/cadastro.js"></script>
-    
+
+    <!-- Firebase SDK via CDN -->
+    <script type="module">
+        // Importar funções específicas do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgXkergZeH7lLWW8eSZLLqZ4t04DpyAhc",
+            authDomain: "financas-7bb6b.firebaseapp.com",
+            databaseURL: "https://financas-7bb6b-default-rtdb.firebaseio.com",
+            projectId: "financas-7bb6b",
+            storageBucket: "financas-7bb6b.firebasestorage.app",
+            messagingSenderId: "708455299484",
+            appId: "1:708455299484:web:1c25f12d52e37184a57059",
+            measurementId: "G-9QM9MFJCYN"
+        };
+
+        // Inicializando o Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth();
+        const database = getDatabase(app);
+
+        // Referências aos elementos do formulário
+        const form = document.querySelector(".form");
+        const fullNameInput = document.getElementById("editTextFullName");
+        const emailInput = document.getElementById("editTextEmail");
+        const passwordInput = document.getElementById("editTextPassword");
+        const confirmPasswordInput = document.getElementById("editTextConfirmPassword");
+        const signupButton = document.getElementById("buttonSignup");
+
+        // Função de validação do formulário
+    function validateForm() {
+    const fullName = fullNameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+
+    // Verificar se todos os campos foram preenchidos
+    if (!fullName || !email || !password || !confirmPassword) {
+        alert("Por favor, preencha todos os campos.");
+        return false;
+    }
+
+    // Verificar se as senhas coincidem
+    if (password !== confirmPassword) {
+        alert("As senhas não coincidem.");
+        return false;
+    }
+
+    // Verificar a força da senha: mínimo de 6 caracteres, uma maiúscula, uma minúscula, e um número
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/; // Pelo menos uma minúscula, uma maiúscula, um número e 6 caracteres
+    if (!passwordRegex.test(password)) {
+        alert("A senha deve ter pelo menos 6 caracteres, incluindo uma letra minúscula, uma maiúscula e um número.");
+        return false;
+    }
+
+    return true;
+}
+
+
+        // Função de cadastro de usuário no Firebase
+        async function registerUser(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            if (!validateForm()) return; // Valida os dados antes de prosseguir
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            try {
+                // Cria o usuário com o Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Salva os dados do usuário no Firebase Realtime Database
+                const userId = user.uid;
+                const fullName = fullNameInput.value.trim();
+
+                await set(ref(database, 'users/' + userId), {
+                    fullName: fullName,
+                    email: email,
+                    userId: userId
+                });
+
+                alert("Cadastro realizado com sucesso!");
+                window.location.href = "login.html"; // Redireciona para a página de login
+
+            } catch (error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                alert(`Erro: ${errorCode}, ${errorMessage}`);
+            }
+        }
+
+        // Evento de submit do formulário
+        form.addEventListener("submit", registerUser);
+    </script>
+
 </body>
 </html>

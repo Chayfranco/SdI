@@ -21,54 +21,85 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="fas fa-bars"></span>
       </button>
-      <h3 style = "font-family: sans-serif;"> FinTech </h3>
+      <h3 style="font-family: sans-serif;"> FinTech </h3>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="inicio.html" id="inicio">Início</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="cadastro.html" id="Cadastro">Cadastre-se</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="login.html" id="perfil">Entrar</a>
-          </li>
+        <ul class="navbar-nav ml-auto" id="navbarLinks">
+          <!-- Links de navegação serão inseridos aqui dinamicamente -->
         </ul>
       </div>
     </div>
   </nav>
-  <!-- Fim da Barra de Navegação -->
-   <h1> Bem-vindo ao [Nome do Site], a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.
 
-    Onde você encontra aqui:
+  <h1>Bem-vindo ao [Nome do Site], a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.</h1>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgXkergZeH7lLWW8eSZLLqZ4t04DpyAhc",
+      authDomain: "financas-7bb6b.firebaseapp.com",
+      databaseURL: "https://financas-7bb6b-default-rtdb.firebaseio.com",
+      projectId: "financas-7bb6b",
+      storageBucket: "financas-7bb6b.firebasestorage.app",
+      messagingSenderId: "708455299484",
+      appId: "1:708455299484:web:1c25f12d52e37184a57059",
+      measurementId: "G-9QM9MFJCYN"
+    };
+
+    // Inicializa o Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     
-    Investimentos: Análises e orientações sobre renda fixa, variável, fundos e outras oportunidades de mercado.
-    Planejamento Financeiro: Estratégias para organizar suas finanças, evitar dívidas e construir um futuro sólido.
-    Educação Financeira: Conteúdos que ajudam a entender melhor o mercado e desenvolver uma mentalidade financeira sustentável.
-    Independente do seu nível de experiência, oferecemos informações valiosas para quem busca prosperidade e independência financeira. Acompanhe nossos conteúdos e comece a construir um futuro mais seguro hoje mesmo.
-    
-    </h1>
+    // Função para mostrar os links de navegação com base no estado de login
+    function updateNavLinks(user) {
+      const navbarLinks = document.getElementById('navbarLinks');
+      navbarLinks.innerHTML = ''; // Limpa os links existentes
 
+      if (user) {
+        // Usuário logado
+        navbarLinks.innerHTML = `
+          <li class="nav-item">
+            <a class="nav-link" href="perfil.html" id="perfil">Perfil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="logout">Sair</a>
+          </li>
+        `;
+        
+        // Adiciona o evento de logout
+        document.getElementById('logout').addEventListener('click', () => {
+          // Caixa de confirmação de logout
+          const confirmation = window.confirm("Tem certeza de que deseja sair?");
+          
+          if (confirmation) {
+            signOut(auth).then(() => {
+              // Redireciona para a página de login
+              window.location.replace("login.html");
+            }).catch((error) => {
+              alert(`Erro ao sair: ${error.message}`);
+            });
+          }
+        });
+      } else {
+        // Usuário não logado
+        navbarLinks.innerHTML = `
+          <li class="nav-item">
+            <a class="nav-link" href="login.html">Login</a>
+          </li>
+        `;
+      }
+    }
 
-  <script>
-    const uploadBox = document.getElementById('uploadBox');
-
-    // Funções de arrastar e soltar
-    uploadBox.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      uploadBox.classList.add('dragover');
+    // Verifica o estado de autenticação do usuário
+    onAuthStateChanged(auth, (user) => {
+      updateNavLinks(user);
     });
-
-    uploadBox.addEventListener('dragleave', function() {
-      uploadBox.classList.remove('dragover');
-    });
-
   </script>
 
-  <!-- Scripts -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-  <script src="js/scrollIt.min.js"></script>
+  <script src="inicio.js"></script>
   <script>
     // Seleciona todas as abas de navegação
     const navLinks = document.querySelectorAll('.nav-link');

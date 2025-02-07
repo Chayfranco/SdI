@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinTec - Convidado</title>
+  <link rel="icon" href="../imagens/logo_sem_fundo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="inicio.css">
+  <link rel="stylesheet" type="text/css" href="arquivo.css">
+</head>
+<body class="background-preto2">
+
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand navbar-logo" href="inicio.html">
+        <img src="pngwing.com.png" alt="logo" class="logo-1">
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="fas fa-bars"></span>
+      </button>
+      <h3 style = "font-family: sans-serif;"> FinTech </h3>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="inicio.html" id="inicio">Início</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="cadastro.html" id="Cadastro">Cadastre-se</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="login.html" id="perfil">Entrar</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Fim da Barra de Navegação -->
+   <h1> Bem-vindo ao [Nome do Site], a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.
+
+    Onde você encontra aqui:
+    
+    Investimentos: Análises e orientações sobre renda fixa, variável, fundos e outras oportunidades de mercado.
+    Planejamento Financeiro: Estratégias para organizar suas finanças, evitar dívidas e construir um futuro sólido.
+    Educação Financeira: Conteúdos que ajudam a entender melhor o mercado e desenvolver uma mentalidade financeira sustentável.
+    Independente do seu nível de experiência, oferecemos informações valiosas para quem busca prosperidade e independência financeira. Acompanhe nossos conteúdos e comece a construir um futuro mais seguro hoje mesmo.
+    
+    </h1>
+
+
+  <script>
+    const uploadBox = document.getElementById('uploadBox');
+
+    // Funções de arrastar e soltar
+    uploadBox.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadBox.classList.add('dragover');
+    });
+
+    uploadBox.addEventListener('dragleave', function() {
+      uploadBox.classList.remove('dragover');
+    });
+
+  </script>
+
+  <!-- Scripts -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  <script src="js/scrollIt.min.js"></script>
+  <script>
+    // Seleciona todas as abas de navegação
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    // Adiciona um evento de clique a cada aba
+    navLinks.forEach(link => {
+      link.addEventListener('click', function () {
+        // Remove a classe 'active' de todas as abas
+        navLinks.forEach(nav => nav.classList.remove('active'));
+
+        // Adiciona a classe 'active' à aba clicada
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
