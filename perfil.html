@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuimLab</title>
+  <title>Perfil - QuimLab</title>
   <link rel="icon" href="../imagens/logo_sem_fundo.png" type="image/x-icon">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
@@ -13,6 +13,7 @@
 </head>
 <body class="background-preto2">
 
+  <!-- Barra de navegação -->
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container">
       <a class="navbar-brand navbar-logo" href="inicio.html">
@@ -29,9 +30,25 @@
       </div>
     </div>
   </nav>
-  <!-- Fim da Barra de Navegação -->
 
-  <h1>Bem-vindo ao [Nome do Site], a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.</h1>
+  <!-- Conteúdo da página de perfil -->
+  <div class="container" style="margin-top: 100px;">
+    <h1>Bem-vindo ao seu Perfil</h1>
+    <p>Aqui você pode ver as informações da sua conta e gerenciar suas configurações.</p>
+
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title">Informações da Conta</h5>
+        <p class="card-text">Nome: [Nome do Usuário]</p>
+        <p class="card-text">Email: [Email do Usuário]</p>
+        <!-- Adicione mais informações conforme necessário -->
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <button class="btn btn-danger" id="logout">Sair</button>
+    </div>
+  </div>
 
   <script type="module">
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -52,7 +69,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Função para mostrar o conteúdo com base no estado de login
+    // Função para mostrar os links de navegação com base no estado de login
     function updateNavLinks(user) {
       const navbarLinks = document.getElementById('navbarLinks');
       navbarLinks.innerHTML = ''; // Limpa os links existentes
@@ -71,37 +88,27 @@
             <a class="nav-link" href="perfil.html" id="perfil">Perfil</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" id="logout">Sair</a>
+            <a class="nav-link" id="logout">Sair</a>
           </li>
         `;
         
         // Adiciona o evento de logout
         document.getElementById('logout').addEventListener('click', () => {
-          // Caixa de confirmação de logout
           const confirmation = window.confirm("Tem certeza de que deseja sair?");
           
           if (confirmation) {
             signOut(auth).then(() => {
-              // Redireciona para a página de login após o logout
-              window.location.href = "login.html"; // Redireciona para a página de login
-
-              // Limpa o histórico de navegação para impedir o retorno à página anterior
-              history.pushState(null, null, location.href);
-              history.back();
-              history.forward();
+              // Redireciona para a página de login
+              window.location.replace("login.html");
             }).catch((error) => {
               alert(`Erro ao sair: ${error.message}`);
             });
           }
         });
       } else {
-        // Usuário não logado
         navbarLinks.innerHTML += `
           <li class="nav-item">
-            <a class="nav-link" href="login.html" id="login">Entrar</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="cadastro.html" id="Cadastro">Cadastre-se</a>
+            <a class="nav-link" href="login.html">Login</a>
           </li>
         `;
       }
@@ -115,7 +122,7 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-  <script src="js/scrollIt.min.js"></script>
+  <script src="inicio.js"></script>
   <script>
     // Seleciona todas as abas de navegação
     const navLinks = document.querySelectorAll('.nav-link');
