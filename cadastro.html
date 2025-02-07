@@ -64,34 +64,33 @@
         const signupButton = document.getElementById("buttonSignup");
 
         // Função de validação do formulário
-    function validateForm() {
-    const fullName = fullNameInput.value.trim();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-    const confirmPassword = confirmPasswordInput.value;
+        function validateForm() {
+            const fullName = fullNameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
 
-    // Verificar se todos os campos foram preenchidos
-    if (!fullName || !email || !password || !confirmPassword) {
-        alert("Por favor, preencha todos os campos.");
-        return false;
-    }
+            // Verificar se todos os campos foram preenchidos
+            if (!fullName || !email || !password || !confirmPassword) {
+                alert("Por favor, preencha todos os campos.");
+                return false;
+            }
 
-    // Verificar se as senhas coincidem
-    if (password !== confirmPassword) {
-        alert("As senhas não coincidem.");
-        return false;
-    }
+            // Verificar se as senhas coincidem
+            if (password !== confirmPassword) {
+                alert("As senhas não coincidem.");
+                return false;
+            }
 
-    // Verificar a força da senha: mínimo de 6 caracteres, uma maiúscula, uma minúscula, e um número
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/; // Pelo menos uma minúscula, uma maiúscula, um número e 6 caracteres
-    if (!passwordRegex.test(password)) {
-        alert("A senha deve ter pelo menos 6 caracteres, incluindo uma letra minúscula, uma maiúscula e um número.");
-        return false;
-    }
+            // Verificar a força da senha: mínimo de 6 caracteres, uma maiúscula, uma minúscula, e um número
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/; // Pelo menos uma minúscula, uma maiúscula, um número e 6 caracteres
+            if (!passwordRegex.test(password)) {
+                alert("A senha deve ter pelo menos 6 caracteres, incluindo uma letra minúscula, uma maiúscula e um número.");
+                return false;
+            }
 
-    return true;
-}
-
+            return true;
+        }
 
         // Função de cadastro de usuário no Firebase
         async function registerUser(event) {
@@ -117,7 +116,13 @@
                     userId: userId
                 });
 
-                alert("Cadastro realizado com sucesso!");
+                // Verifica se o e-mail é do tipo @ufrpe.br
+                if (email.includes('@ufrpe.br')) {
+                    alert("Cadastro realizado com sucesso! Você tem uma conta de administrador.");
+                } else {
+                    alert("Cadastro realizado com sucesso!");
+                }
+
                 window.location.href = "login.html"; // Redireciona para a página de login
 
             } catch (error) {
