@@ -1,8 +1,10 @@
-// Importa as funções necessárias do SDK Firebase
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getDatabase, ref, set } from "firebase/database";
+// Importa as funções necessárias do Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+// Importa as funções de criptografia
+import { encryptAES, encryptRSA, generateAESKey } from "./crypto.js";
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -18,8 +20,7 @@ const firebaseConfig = {
 
 // Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth();
+const auth = getAuth(app);
 const database = getDatabase(app);
 
 // Referências aos elementos do formulário
@@ -27,67 +28,55 @@ const form = document.querySelector(".form");
 const fullNameInput = document.getElementById("editTextFullName");
 const emailInput = document.getElementById("editTextEmail");
 const passwordInput = document.getElementById("editTextPassword");
-const confirmPasswordInput = document.getElementById("editTextConfirmPassword");
-const signupButton = document.getElementById("buttonSignup");
 
-// Função de validação do formulário
-function validateForm() {
+// Chave pública RSA (substitua pela sua real)
+const publicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+-----END PUBLIC KEY-----`;
+
+// Função de cadastro do usuário
+async function registerUser(event) {
+  event.preventDefault(); // Evita envio padrão do formulário
+
   const fullName = fullNameInput.value.trim();
   const email = emailInput.value.trim();
   const password = passwordInput.value;
-  const confirmPassword = confirmPasswordInput.value;
 
-  if (!fullName || !email || !password || !confirmPassword) {
-    alert("Por favor, preencha todos os campos.");
-    return false;
+  if (!fullName || !email || !password) {
+    alert("Preencha todos os campos!");
+    return;
   }
-
-  if (password !== confirmPassword) {
-    alert("As senhas não coincidem.");
-    return false;
-  }
-
-  if (password.length < 6) {
-    alert("A senha deve ter pelo menos 6 caracteres.");
-    return false;
-  }
-
-  return true;
-}
-
-// Função de cadastro de usuário no Firebase
-async function registerUser(event) {
-  event.preventDefault(); // Impede o envio padrão do formulário
-
-  if (!validateForm()) return; // Valida os dados antes de prosseguir
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
 
   try {
-    // Cria o usuário com o Firebase Authentication
+    // Cria o usuário no Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
-    // Salva os dados do usuário no Firebase Realtime Database
     const userId = user.uid;
-    const fullName = fullNameInput.value.trim();
 
-    await set(ref(database, 'users/' + userId), {
-      fullName: fullName,
-      email: email,
-      userId: userId
+    // Gera uma chave AES e IV aleatórios
+    const { aesKey, iv } = await generateAESKey();
+
+    // Criptografa os dados
+    const encryptedFullName = await encryptAES(fullName, aesKey, iv);
+    const encryptedEmail = await encryptAES(email, aesKey, iv);
+    const encryptedAESKey = await encryptRSA(aesKey, publicKey);
+
+    // Salva os dados criptografados no Firebase
+    await set(ref(database, `users/${userId}`), {
+      encryptedFullName: encryptedFullName,
+      encryptedEmail: encryptedEmail,
+      encryptedAESKey: encryptedAESKey,
+      iv: iv
     });
 
     alert("Cadastro realizado com sucesso!");
-    window.location.href = "login.html"; // Redireciona para a página de login
+    window.location.href = "login.html";
 
   } catch (error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    alert(`Erro: ${errorCode}, ${errorMessage}`);
+    console.error("Erro no cadastro:", error);
+    alert(`Erro no cadastro: ${error.message}`);
   }
 }
 
-// Evento de submit do formulário
+// Adiciona evento de submit ao formulário
 form.addEventListener("submit", registerUser);
