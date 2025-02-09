@@ -202,7 +202,7 @@
   
   <script type="module">
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
   
     const auth = getAuth();
     const db = getDatabase();
@@ -230,15 +230,11 @@
     });
   
     function loadPosts() {
-      const user = auth.currentUser;
-      if (!user) return;
-    
       const postsContainer = document.getElementById('posts-container');
       postsContainer.innerHTML = ''; // Limpa os posts antes de carregar novos
     
       const publicPostsRef = ref(db, 'posts/public');
-      const privatePostsRef = ref(db, `posts/private/${user.uid}`);
-    
+      
       function renderPosts(snapshot, isPublic) {
         snapshot.forEach(childSnapshot => {
           const post = childSnapshot.val();
@@ -249,9 +245,15 @@
             <div class="card shadow-sm p-3">
               <div class="card-body">
                 <h5 class="card-title">Descrição</h5>
-                <p class="card-text">${post.description}</p>
-                <h6 class="card-subtitle mb-2 text-muted">Valor: R$ ${post.amount}</h6>
-                <p class="text-muted"><small>Postado em: ${new Date(post.timestamp).toLocaleString()}</small></p>
+                <p class="card-text">
+                  ${post.description}
+                </p>
+                <h6 class="card-subtitle mb-2 text-muted">
+                  Valor: R$ ${post.amount}
+                </h6>
+                <p class="text-muted">
+                  <small>Postado em: ${new Date(post.timestamp).toLocaleString()}</small>
+                </p>
                 ${isPublic ? '<span class="badge badge-success">Público</span>' : '<span class="badge badge-secondary">Privado</span>'}
               </div>
             </div>
@@ -260,24 +262,38 @@
         });
       }
     
-      // Carregar apenas posts públicos para todos os usuários
+      // Carregar posts públicos para todos os usuários, incluindo visitantes
       onValue(publicPostsRef, snapshot => {
         postsContainer.innerHTML = ''; // Garante que a lista seja resetada antes de carregar
         renderPosts(snapshot, true);
       });
     
-      // Carregar posts privados apenas do usuário logado
-      if (user) {
-        onValue(privatePostsRef, snapshot => {
-          renderPosts(snapshot, false);
-        });
-      }
+      onAuthStateChanged(auth, user => {
+        if (user) {
+          const privatePostsRef = ref(db, `posts/private/${user.uid}`);
+          const allPrivatePostsRef = ref(db, 'posts/private');
+    
+          // Verifica se o usuário é admin (@ufrpe.br)
+          if (user.email.endsWith('@ufrpe.br')) {
+            onValue(allPrivatePostsRef, snapshot => {
+              snapshot.forEach(userSnapshot => {
+                renderPosts(userSnapshot, false);
+              });
+            });
+          } else {
+            // Carregar posts privados apenas do usuário logado
+            onValue(privatePostsRef, snapshot => {
+              renderPosts(snapshot, false);
+            });
+          }
+        }
+      });
     }
     
-  
+    // Carregar posts públicos para visitantes e posts privados para usuários autenticados
+    loadPosts();
     onAuthStateChanged(auth, user => { if (user) loadPosts(); });
   </script>
-  
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
