@@ -30,25 +30,27 @@
     </div>
   </nav>
   
-  <h1>Bem-vindo ao [Nome do Site], a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.</h1>
+  <h1>Bem-vindo ao FinTech, a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.</h1>
 
   <!-- Formulário para adicionar finanças -->
-  <section id="add-finance">
-    <div class="container">
-      <h2>Compartilhar suas Finanças</h2>
-      <form id="finance-form">
-        <div class="form-group">
-          <label for="finance-description">Descrição</label>
-          <textarea id="finance-description" class="form-control" rows="3" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="finance-amount">Valor</label>
-          <input type="number" id="finance-amount" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Compartilhar</button>
-      </form>
+  <form id="finance-form">
+    <div class="form-group">
+      <label for="finance-description">Descrição</label>
+      <textarea id="finance-description" class="form-control" rows="3" required></textarea>
     </div>
-  </section>
+    <div class="form-group">
+      <label for="finance-amount">Valor</label>
+      <input type="number" id="finance-amount" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label for="finance-privacy">Privacidade</label>
+      <select id="finance-privacy" class="form-control">
+        <option value="public">Público</option>
+        <option value="private">Privado</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Compartilhar</button>
+  </form>
 
   <!-- Exibição de publicações -->
   <section id="finance-posts">
@@ -189,6 +191,71 @@
       }
     });
   </script>
+  
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+  
+    const auth = getAuth();
+    const db = getDatabase();
+  
+    document.getElementById('finance-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const description = document.getElementById('finance-description').value;
+      const amount = document.getElementById('finance-amount').value;
+      const privacy = document.getElementById('finance-privacy').value;
+      const user = auth.currentUser;
+      
+      if (user && description && amount) {
+        const postId = Date.now();
+        const postData = {
+          description, amount, privacy, timestamp: postId, userId: user.uid
+        };
+        
+        const postRef = ref(db, `posts/${privacy === 'public' ? 'public' : 'private/' + user.uid}/${postId}`);
+        set(postRef, postData)
+          .then(() => alert('Postagem compartilhada com sucesso!'))
+          .catch(error => alert(`Erro ao compartilhar: ${error.message}`));
+      } else {
+        alert('Preencha todos os campos e faça login!');
+      }
+    });
+  
+    function loadPosts() {
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      const publicPostsRef = ref(db, 'posts/public');
+      const privatePostsRef = ref(db, `posts/private/${user.uid}`);
+      const postsContainer = document.getElementById('posts-container');
+      postsContainer.innerHTML = '';
+      
+      function renderPosts(snapshot) {
+        snapshot.forEach(childSnapshot => {
+          const post = childSnapshot.val();
+          const postElement = document.createElement('div');
+          postElement.classList.add('list-group-item', 'mb-3');
+          postElement.innerHTML = `
+            <div class="card shadow-sm p-3">
+              <div class="card-body">
+                <h5 class="card-title">Descrição</h5>
+                <p class="card-text">${post.description}</p>
+                <h6 class="card-subtitle mb-2 text-muted">Valor: R$ ${post.amount}</h6>
+                <p class="text-muted"><small>Postado em: ${new Date(post.timestamp).toLocaleString()}</small></p>
+              </div>
+            </div>
+          `;
+          postsContainer.appendChild(postElement);
+        });
+      }
+      
+      onValue(publicPostsRef, renderPosts);
+      onValue(privatePostsRef, renderPosts);
+    }
+  
+    onAuthStateChanged(auth, user => { if (user) loadPosts(); });
+  </script>
+  
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
