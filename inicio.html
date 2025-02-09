@@ -10,6 +10,13 @@
   <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="inicio.css">
   <link rel="stylesheet" type="text/css" href="arquivo.css">
+  <style>
+    /* Garante que o conteúdo fique abaixo da navbar */
+    .content {
+      margin-top: 800px; /* Ajuste conforme a altura real da navbar */
+    }
+  </style>
+  
 </head>
 <body class="background-preto2">
 
@@ -29,7 +36,7 @@
       </div>
     </div>
   </nav>
-  
+  <div class="container content">
   <h1>Bem-vindo ao FinTech, a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.</h1>
 
   <!-- Formulário para adicionar finanças -->
@@ -60,6 +67,7 @@
         <!-- As publicações serão exibidas aqui -->
       </div>
     </div>
+  </div>
   </section>
 
   <script type="module">
@@ -224,17 +232,19 @@
     function loadPosts() {
       const user = auth.currentUser;
       if (!user) return;
-      
+    
+      const postsContainer = document.getElementById('posts-container');
+      postsContainer.innerHTML = ''; // Limpa os posts antes de carregar novos
+    
       const publicPostsRef = ref(db, 'posts/public');
       const privatePostsRef = ref(db, `posts/private/${user.uid}`);
-      const postsContainer = document.getElementById('posts-container');
-      postsContainer.innerHTML = '';
-      
-      function renderPosts(snapshot) {
+    
+      function renderPosts(snapshot, isPublic) {
         snapshot.forEach(childSnapshot => {
           const post = childSnapshot.val();
           const postElement = document.createElement('div');
           postElement.classList.add('list-group-item', 'mb-3');
+    
           postElement.innerHTML = `
             <div class="card shadow-sm p-3">
               <div class="card-body">
@@ -242,16 +252,28 @@
                 <p class="card-text">${post.description}</p>
                 <h6 class="card-subtitle mb-2 text-muted">Valor: R$ ${post.amount}</h6>
                 <p class="text-muted"><small>Postado em: ${new Date(post.timestamp).toLocaleString()}</small></p>
+                ${isPublic ? '<span class="badge badge-success">Público</span>' : '<span class="badge badge-secondary">Privado</span>'}
               </div>
             </div>
           `;
           postsContainer.appendChild(postElement);
         });
       }
-      
-      onValue(publicPostsRef, renderPosts);
-      onValue(privatePostsRef, renderPosts);
+    
+      // Carregar apenas posts públicos para todos os usuários
+      onValue(publicPostsRef, snapshot => {
+        postsContainer.innerHTML = ''; // Garante que a lista seja resetada antes de carregar
+        renderPosts(snapshot, true);
+      });
+    
+      // Carregar posts privados apenas do usuário logado
+      if (user) {
+        onValue(privatePostsRef, snapshot => {
+          renderPosts(snapshot, false);
+        });
+      }
     }
+    
   
     onAuthStateChanged(auth, user => { if (user) loadPosts(); });
   </script>
