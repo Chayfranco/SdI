@@ -1,5 +1,6 @@
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getDatabase, ref, set, push, get, child } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgXkergZeH7lLWW8eSZLLqZ4t04DpyAhc",
@@ -15,6 +16,7 @@ const firebaseConfig = {
 // Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
 const logoutBtn = document.getElementById('logout');
 
@@ -69,3 +71,58 @@ function updateNavLinks(user) {
 onAuthStateChanged(auth, (user) => {
   updateNavLinks(user);
 });
+
+// Função para postar as finanças no Firebase
+document.getElementById('post-finance-form')?.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const postContent = document.getElementById('finance-post').value.trim();
+
+  if (postContent) {
+    const user = auth.currentUser;
+    if (user) {
+      const newPostRef = push(ref(db, 'posts'));
+      set(newPostRef, {
+        userId: user.uid,
+        content: postContent,
+        timestamp: Date.now()
+      }).then(() => {
+        document.getElementById('finance-post').value = ''; // Limpa o campo após o post
+        loadPosts(); // Carrega as postagens após adicionar uma nova
+      }).catch((error) => {
+        alert(`Erro ao postar: ${error.message}`);
+      });
+    } else {
+      alert('Você precisa estar logado para postar.');
+    }
+  }
+});
+
+// Função para carregar e exibir as postagens
+function loadPosts() {
+  const postsRef = ref(db, 'posts');
+  get(postsRef).then((snapshot) => {
+    const postsContainer = document.getElementById('finance-posts');
+    postsContainer.innerHTML = ''; // Limpa as postagens antigas
+
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        const post = childSnapshot.val();
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.innerHTML = `
+          <p><strong>Usuário:</strong> ${post.userId}</p>
+          <p><strong>Postagem:</strong> ${post.content}</p>
+          <p><small>${new Date(post.timestamp).toLocaleString()}</small></p>
+        `;
+        postsContainer.appendChild(postElement);
+      });
+    } else {
+      postsContainer.innerHTML = '<p>Nenhuma postagem encontrada.</p>';
+    }
+  }).catch((error) => {
+    alert(`Erro ao carregar as postagens: ${error.message}`);
+  });
+}
+
+// Carregar as postagens ao carregar a página
+loadPosts();

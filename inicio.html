@@ -29,13 +29,41 @@
       </div>
     </div>
   </nav>
-  <!-- Fim da Barra de Navegação -->
-
+  
   <h1>Bem-vindo ao [Nome do Site], a sua fonte de informação para uma gestão financeira eficiente e investimentos estratégicos. Nosso objetivo é ajudá-lo a tomar decisões seguras e inteligentes para alcançar estabilidade e crescimento patrimonial.</h1>
+
+  <!-- Formulário para adicionar finanças -->
+  <section id="add-finance">
+    <div class="container">
+      <h2>Compartilhar suas Finanças</h2>
+      <form id="finance-form">
+        <div class="form-group">
+          <label for="finance-description">Descrição</label>
+          <textarea id="finance-description" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="finance-amount">Valor</label>
+          <input type="number" id="finance-amount" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Compartilhar</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Exibição de publicações -->
+  <section id="finance-posts">
+    <div class="container">
+      <h2>Publicações</h2>
+      <div id="posts-container" class="list-group">
+        <!-- As publicações serão exibidas aqui -->
+      </div>
+    </div>
+  </section>
 
   <script type="module">
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBgXkergZeH7lLWW8eSZLLqZ4t04DpyAhc",
@@ -48,16 +76,15 @@
       measurementId: "G-9QM9MFJCYN"
     };
 
-    // Inicializa o Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getDatabase(app);
 
     // Função para mostrar o conteúdo com base no estado de login
     function updateNavLinks(user) {
       const navbarLinks = document.getElementById('navbarLinks');
-      navbarLinks.innerHTML = ''; // Limpa os links existentes
+      navbarLinks.innerHTML = ''; 
 
-      // Adiciona o link "Início" em todas as situações
       navbarLinks.innerHTML += `
         <li class="nav-item">
           <a class="nav-link" href="inicio.html">Início</a>
@@ -65,7 +92,6 @@
       `;
 
       if (user) {
-        // Usuário logado
         navbarLinks.innerHTML += `
           <li class="nav-item">
             <a class="nav-link" href="perfil.html" id="perfil">Perfil</a>
@@ -75,27 +101,17 @@
           </li>
         `;
         
-        // Adiciona o evento de logout
         document.getElementById('logout').addEventListener('click', () => {
-          // Caixa de confirmação de logout
-          const confirmation = window.confirm("Tem certeza de que deseja sair?");
-          
-          if (confirmation) {
-            signOut(auth).then(() => {
-              // Redireciona para a página de login após o logout
-              window.location.href = "login.html"; // Redireciona para a página de login
-
-              // Limpa o histórico de navegação para impedir o retorno à página anterior
-              history.pushState(null, null, location.href);
-              history.back();
-              history.forward();
-            }).catch((error) => {
-              alert(`Erro ao sair: ${error.message}`);
-            });
-          }
+          signOut(auth).then(() => {
+            window.location.href = "login.html";
+            history.pushState(null, null, location.href);
+            history.back();
+            history.forward();
+          }).catch((error) => {
+            alert(`Erro ao sair: ${error.message}`);
+          });
         });
       } else {
-        // Usuário não logado
         navbarLinks.innerHTML += `
           <li class="nav-item">
             <a class="nav-link" href="login.html" id="login">Entrar</a>
@@ -107,9 +123,70 @@
       }
     }
 
-    // Verifica o estado de autenticação do usuário
     onAuthStateChanged(auth, (user) => {
       updateNavLinks(user);
+    });
+
+    // Função para adicionar uma nova postagem
+    document.getElementById('finance-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const description = document.getElementById('finance-description').value;
+      const amount = document.getElementById('finance-amount').value;
+      
+      if(description && amount) {
+        const userId = auth.currentUser.uid;
+        const newPostRef = ref(db, 'posts/' + userId + '/' + Date.now());
+        set(newPostRef, {
+          description: description,
+          amount: amount,
+          timestamp: Date.now()
+        }).then(() => {
+          alert('Postagem compartilhada com sucesso!');
+          loadPosts();
+        }).catch((error) => {
+          alert(`Erro ao compartilhar postagem: ${error.message}`);
+        });
+      } else {
+        alert('Por favor, preencha todos os campos!');
+      }
+    });
+
+    // Função para carregar as publicações do Firebase
+    function loadPosts() {
+      const userId = auth.currentUser ? auth.currentUser.uid : null;
+      if(userId) {
+        const postsRef = ref(db, 'posts/' + userId);
+        onValue(postsRef, (snapshot) => {
+          const postsContainer = document.getElementById('posts-container');
+          postsContainer.innerHTML = '';  // Limpa o conteúdo atual
+
+          snapshot.forEach((postSnapshot) => {
+            const post = postSnapshot.val();
+            const postElement = document.createElement('div');
+            postElement.classList.add('list-group-item', 'mb-3');
+            postElement.style.backgroundColor = '#f9f9f9';  // Cor de fundo suave
+
+            postElement.innerHTML = `
+              <div class="card shadow-sm p-3">
+                <div class="card-body">
+                  <h5 class="card-title">Descrição</h5>
+                  <p class="card-text">${post.description}</p>
+                  <h6 class="card-subtitle mb-2 text-muted">Valor: R$ ${post.amount}</h6>
+                  <p class="text-muted"><small>Postado em: ${new Date(post.timestamp).toLocaleString()}</small></p>
+                </div>
+              </div>
+            `;
+            postsContainer.appendChild(postElement);
+          });
+        });
+      }
+    }
+
+    // Carrega as postagens ao carregar a página
+    onAuthStateChanged(auth, (user) => {
+      if(user) {
+        loadPosts();
+      }
     });
   </script>
 
@@ -117,16 +194,10 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
   <script src="js/scrollIt.min.js"></script>
   <script>
-    // Seleciona todas as abas de navegação
     const navLinks = document.querySelectorAll('.nav-link');
-
-    // Adiciona um evento de clique a cada aba
     navLinks.forEach(link => {
       link.addEventListener('click', function () {
-        // Remove a classe 'active' de todas as abas
         navLinks.forEach(nav => nav.classList.remove('active'));
-
-        // Adiciona a classe 'active' à aba clicada
         this.classList.add('active');
       });
     });
